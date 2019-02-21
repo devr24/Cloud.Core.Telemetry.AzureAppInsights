@@ -11,7 +11,7 @@ Provider classes found in the _Cloud.Core.Telemetry.Logging_ package.
 
 As the logger follows the base `ILogger` implementation, it's very flexible in how it can be used.  To create an instance, do the following:
 
-```
+```csharp
 var logger = new AppInsightsLogger("insightsKey");
 
 logger.LogInformation("Sample information message");
@@ -22,9 +22,9 @@ logger.LogException("Sample exception message");
 
 Any of the logging methods can also handle exception, such as:
 
-```
+```csharp
 logger.LogWarning(new Exception("Something's gone wrong!"));
-``
+```
 
 ## Test Coverage
 A threshold will be added to this package to ensure the test coverage is above 80% for branches, functions and lines.  If it's not above the required threshold 
