@@ -10,10 +10,11 @@
     /// <summary>
     /// Telemetry logger factory adds the AddTelemetryLogger method to the ILoggingBuilder.
     /// </summary>
-    public static class LoggingBuilderExtensions
+    public static class LoggingBuilderExtension
     {
         /// <summary>
         /// Adds the telemetry logger factory method to the logging builder.
+        /// Will attempt to pull "InstrumentationKey" from config values "Logging:InstrumentationKey" or directly from "InstrumentationKey"
         /// </summary>
         /// <param name="builder">The builder to add to.</param>
         /// <returns>The modified builder.</returns>
@@ -23,7 +24,11 @@
             {
                 var config = a.GetService<IConfiguration>();
 
-                var key = config.GetValue<string>("Logging:InstrumentationKey");
+                var key = GetInstrumentationKeyFromConfig(config);
+
+                if (key.IsNullOrEmpty())
+                    throw new InvalidOperationException("Could not find \"InstrumentationKey\" in configuration");
+
                 var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                 var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
                 
@@ -34,21 +39,65 @@
             return builder;
         }
 
-        private static LogLevel GetLogLevel(string defaultLevel, string desiredLevel)
+        /// <summary>
+        /// Adds the telemetry logger factory method to the logging builder.
+        /// </summary>
+        /// <param name="builder">The builder to add to.</param>
+        /// <param name="instrumentationKey">Instrumentation key for the Application Insights</param>
+        /// <returns></returns>
+        public static ILoggingBuilder AddAppInsightsLogger(this ILoggingBuilder builder, string instrumentationKey)
+        {
+            if (!instrumentationKey.IsNullOrWhiteSpace())
+            {
+                builder.Services.AddSingleton<ITelemetryLogger>((a) =>
+                {
+                    var config = a.GetService<IConfiguration>();
+
+                    var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
+                    var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
+
+                    return new AppInsightsLogger(instrumentationKey, GetLogLevel(defaultLevel, telemetryLevel));
+                });
+
+                builder.Services.AddSingleton<ILoggerProvider>(a => new TelemetryLoggerProvider(a.GetService<ITelemetryLogger>()));
+            }
+            return builder;
+        }
+
+        internal static LogLevel GetLogLevel(string defaultLevel, string desiredLevel)
         {
             if (!desiredLevel.IsNullOrEmpty())
                 defaultLevel = desiredLevel;
-            
-            switch (defaultLevel)
+
+            return defaultLevel switch
             {
-                case "Trace": return LogLevel.Trace;
-                case "Information": return LogLevel.Information;
-                case "Critical": return LogLevel.Critical;
-                case "Debug": return LogLevel.Debug;
-                case "Error": return LogLevel.Error;
-                case "Warning": return LogLevel.Warning;
-                default: return LogLevel.None;
-            }
+                "Trace" => LogLevel.Trace,
+                "Information" => LogLevel.Information,
+                "Critical" => LogLevel.Critical,
+                "Debug" => LogLevel.Debug,
+                "Error" => LogLevel.Error,
+                "Warning" => LogLevel.Warning,
+                _ => LogLevel.None,
+            };
+        }
+
+        internal static string GetInstrumentationKeyFromConfig(IConfiguration config)
+        {
+            var key = config.GetValue<string>("AppInsightsInstrumentationKey");
+
+            if (key.IsNullOrEmpty())
+                key = config.GetValue<string>("InstrumentationKey");
+
+            if (key.IsNullOrEmpty())
+                key = config.GetValue<string>("Logging:InstrumentationKey");
+
+            if (key.IsNullOrEmpty())
+                key = config.GetValue<string>("APPINSIGHTS_INSTRUMENTATIONKEY");
+
+            if (key.IsNullOrEmpty())
+                key = config.GetValue<string>("AppInsights:InstrumentationKey");
+            
+            return key;
         }
     }
 }

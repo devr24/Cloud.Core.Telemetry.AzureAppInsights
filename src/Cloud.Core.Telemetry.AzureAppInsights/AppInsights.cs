@@ -1,4 +1,17 @@
-﻿namespace Cloud.Core.Telemetry.AzureAppInsights
+﻿// ***********************************************************************
+// Assembly         : Cloud.Core.Telemetry.AzureAppInsights
+// Author           : rmccabe
+// Created          : 04-19-2020
+//
+// Last Modified By : rmccabe
+// Last Modified On : 04-19-2020
+// ***********************************************************************
+// <copyright file="AppInsights.cs" company="Robert McCabe">
+//     Cloud.Core.Telemetry.AzureAppInsights
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+namespace Cloud.Core.Telemetry.AzureAppInsights
 {
     using Diagnostics = System.Diagnostics;
     using System;
@@ -8,21 +21,33 @@
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights;
     using System.Runtime.CompilerServices;
+    using System.Net.Http;
+    using Newtonsoft.Json;
 
     /// <summary>
-    /// Azure specific Application Insights <see cref="ITelemetryLogger"/> implementation.
+    /// Azure specific Application Insights <see cref="ITelemetryLogger" /> implementation.
     /// </summary>
     /// <seealso cref="Cloud.Core.ITelemetryLogger" />
     public class AppInsightsLogger : ITelemetryLogger
     {
-        private readonly string _instrumentationKey;
-        private readonly LogLevel _level;
-
         private TelemetryClient _client;
 
-        public string InstrumentationKey => _instrumentationKey;
-        public LogLevel LogLevel => _level;
+        /// <summary>
+        /// Gets the instrumentation key.
+        /// </summary>
+        /// <value>The instrumentation key.</value>
+        public string InstrumentationKey { get; }
 
+        /// <summary>
+        /// Gets the log level.
+        /// </summary>
+        /// <value>The log level.</value>
+        public LogLevel LogLevel { get; }
+
+        /// <summary>
+        /// Gets the telemetry client.
+        /// </summary>
+        /// <value>The client.</value>
         internal TelemetryClient Client
         {
             get
@@ -30,8 +55,9 @@
                 if (_client == null)
                 {
                     // Initialise client.
-                    TelemetryConfiguration.Active.InstrumentationKey = _instrumentationKey;
-                    _client = new TelemetryClient();
+                    var config = TelemetryConfiguration.CreateDefault();
+                    config.InstrumentationKey = InstrumentationKey;
+                    _client = new TelemetryClient(config);
 
                     // Default application information - who's running the code, guid for session id and operating system being executed on.
                     Client.Context.User.Id = AppDomain.CurrentDomain.FriendlyName;
@@ -44,12 +70,14 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AppInsightsLogger"/> class.
+        /// Initializes a new instance of the <see cref="AppInsightsLogger" /> class.
         /// </summary>
+        /// <param name="instrumentationKey">The instrumentation key.</param>
+        /// <param name="level">The level.</param>
         public AppInsightsLogger(string instrumentationKey, LogLevel level)
         {
-            _instrumentationKey = instrumentationKey;
-            _level = level;
+            InstrumentationKey = instrumentationKey;
+            LogLevel = level;
         }
 
         /// <inheritdoc />
@@ -62,12 +90,10 @@
         /// Checks if the given <paramref name="logLevel" /> is enabled.
         /// </summary>
         /// <param name="logLevel">level to be checked.</param>
-        /// <returns>
-        ///   <c>true</c> if enabled.
-        /// </returns>
+        /// <returns><c>true</c> if enabled.</returns>
         public bool IsEnabled(LogLevel logLevel)
         {
-            return logLevel >= _level;
+            return logLevel >= LogLevel && logLevel != LogLevel.None;
         }
 
         /// <summary>
@@ -75,7 +101,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="state">The state.</param>
-        /// <returns></returns>
+        /// <returns>IDisposable.</returns>
         public IDisposable BeginScope<T>(T state)
         {
             return null;
@@ -116,9 +142,9 @@
                 {"Telemetry.EventName", eventId.Name}
             };
 
-            if (exception != null)
+            if (exception != null || logLevel >= LogLevel.Error)
             {
-                CreateTelemetryException(logLevel, exception, props, string.Empty, string.Empty, -1);
+                CreateTelemetryException(logLevel, message, exception, props, string.Empty, string.Empty, -1);
             }
             else
             {
@@ -158,11 +184,13 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Critical, ex, properties, callerMemberName, callerFilePath,
+            CreateTelemetryException(LogLevel.Critical, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath,
                 callerLineNumber);
         }
 
-        /// <summary>Logs the debug.</summary>
+        /// <summary>
+        /// Logs the debug.
+        /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="callerMemberName">Name of the caller member.</param>
@@ -176,7 +204,9 @@
                 callerLineNumber);
         }
 
-        /// <summary>Logs the debug.</summary>
+        /// <summary>
+        /// Logs the debug.
+        /// </summary>
         /// <param name="ex">The ex.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="callerMemberName">Name of the caller member.</param>
@@ -186,7 +216,7 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Debug, ex, properties, callerMemberName, callerFilePath,
+            CreateTelemetryException(LogLevel.Debug, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath,
                 callerLineNumber);
         }
 
@@ -204,8 +234,7 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Warning, ex, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryException(LogLevel.Warning, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
@@ -213,8 +242,9 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Error, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            var telemetryEx = new TelemetryException(message);
+
+            CreateTelemetryException(LogLevel.Error, message, telemetryEx, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
@@ -222,8 +252,15 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Error, ex, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryException(LogLevel.Error, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogError(Exception ex, string message, Dictionary<string, string> properties = null,
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = -1)
+        {
+            CreateTelemetryException(LogLevel.Error, message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
@@ -231,8 +268,15 @@
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, null, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, null, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogMetric(string metricName, double metricValue, Dictionary<string, string> properties,
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = -1)
+        {
+            CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <summary>
@@ -243,7 +287,7 @@
         /// <param name="callerMemberName">Name of the caller member.</param>
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
-        /// <returns></returns>
+        /// <returns>Dictionary&lt;System.String, System.String&gt;.</returns>
         private Dictionary<string, string> SetDefaultProperties(LogLevel logLevel,
             Dictionary<string, string> properties,
             string callerMemberName, string callerFilePath, int callerLineNumber)
@@ -265,7 +309,9 @@
             return output;
         }
 
-        /// <summary>Creates the telemetry event.</summary>
+        /// <summary>
+        /// Creates the telemetry event.
+        /// </summary>
         /// <param name="level">The level.</param>
         /// <param name="message">The message.</param>
         /// <param name="properties">The properties.</param>
@@ -298,23 +344,30 @@
         /// Creates the telemetry exception.
         /// </summary>
         /// <param name="level">The level.</param>
+        /// <param name="message">The message to log for the exception.</param>
         /// <param name="ex">The ex.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="callerMemberName">Name of the caller member.</param>
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
-        private void CreateTelemetryException(LogLevel level, Exception ex, Dictionary<string, string> properties,
+        private void CreateTelemetryException(LogLevel level, string message, Exception ex, Dictionary<string, string> properties,
             string callerMemberName, string callerFilePath, int callerLineNumber)
         {
             if (!IsEnabled(level))
                 return;
 
-            var telemetry = new ExceptionTelemetry(ex);
+            var telemetry = new ExceptionTelemetry(ex) { Message = message };
 
             var output = SetDefaultProperties(level, properties, callerMemberName, callerFilePath, callerLineNumber);
 
-            if (!string.IsNullOrEmpty(ex.Message) && !telemetry.Properties.ContainsKey("Telemetry.ExceptionMessage"))
-                telemetry.Properties.Add("Telemetry.ExceptionMessage", ex.Message);
+            if (ex != null)
+            {
+                if (!string.IsNullOrEmpty(ex.Message) &&
+                    !telemetry.Properties.ContainsKey("Telemetry.ExceptionMessage"))
+                {
+                    telemetry.Properties.Add("Telemetry.ExceptionMessage", ex.Message);
+                }
+            }
 
             foreach (var property in output)
             {
@@ -323,6 +376,7 @@
             }
 
             Client.TrackException(telemetry);
+            Client.Flush();
         }
 
         /// <summary>
@@ -335,8 +389,7 @@
         /// <param name="callerMemberName">Name of the caller member.</param>
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
-        private void CreateTelemetryMetric(LogLevel level, string metricName, double metricValue,
-            Dictionary<string, string> properties,
+        private void CreateTelemetryMetric(LogLevel level, string metricName, double metricValue, Dictionary<string, string> properties,
             string callerMemberName, string callerFilePath, int callerLineNumber)
         {
             if (!IsEnabled(level))
@@ -356,6 +409,100 @@
             }
 
             Client.TrackMetric(telemetry);
+            Client.Flush();
+        }
+
+        /// <summary>
+        /// Returns the customDimesions of the log returned from the query. This is only designed for a query that returns a single log.
+        /// </summary>
+        /// <typeparam name="T">The customDimensions model of the log. This could be unique for each component logging to AppInsights.</typeparam>
+        /// <param name="apiKey">The App Insights API Key.</param>
+        /// <param name="appInsightsId">The App Insights Id.</param>
+        /// <param name="query">The App Insights query to retrieve the log.</param>
+        /// <returns>T.</returns>
+        public static T GetCustomDimensions<T>(string apiKey, string appInsightsId, string query) where T : class
+        {
+            var URL = "http://api.applicationinsights.io/v1/apps/{0}/query?query={1}";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(
+                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+                var req = string.Format(URL, appInsightsId, query);
+                var responseMessage = client.GetAsync(req).Result;
+
+                var result = responseMessage.Content.ReadAsStringAsync().Result;
+                var queryResult = JsonConvert.DeserializeObject<BaseLogEntry>(result);
+
+                var customDimensionIndex = queryResult.Tables[0].Columns.FindIndex(log => log.Name == "customDimensions");
+                return JsonConvert.DeserializeObject<T>(queryResult.Tables[0].Rows[0][customDimensionIndex].ToString());
+            }
+        }
+
+        // The following are classes to allow us to deserialize the Json returned from the Http request for GetCustomDimensions. 
+        /// <summary>
+        /// Class Column.
+        /// </summary>
+        private class Column
+        {
+            /// <summary>
+            /// Gets the name.
+            /// </summary>
+            /// <value>The name.</value>
+            public string Name { get; }
+        }
+
+        /// <summary>
+        /// Class Table.
+        /// </summary>
+        private class Table
+        {
+            /// <summary>
+            /// Gets or sets the columns.
+            /// </summary>
+            /// <value>The columns.</value>
+            public List<Column> Columns { get; set; }
+            /// <summary>
+            /// Gets or sets the rows.
+            /// </summary>
+            /// <value>The rows.</value>
+            public List<List<object>> Rows { get; set; }
+        }
+
+        /// <summary>
+        /// Class BaseLogEntry.
+        /// </summary>
+        private class BaseLogEntry
+        {
+            /// <summary>
+            /// Gets or sets the tables.
+            /// </summary>
+            /// <value>The tables.</value>
+            public List<Table> Tables { get; set; }
+        }
+
+        /// <summary>
+        /// Class TelemetryException.
+        /// Implements the <see cref="System.Exception" />
+        /// </summary>
+        /// <seealso cref="System.Exception" />
+        private class TelemetryException : Exception
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="TelemetryException"/> class.
+            /// </summary>
+            /// <param name="message">The message that describes the error.</param>
+            public TelemetryException(string message) : base(message) { }
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="AppInsightsLogger" /> class.
+        /// Flushes on finalize.
+        /// </summary>
+        ~AppInsightsLogger() // finalizer
+        {
+            Flush();
         }
     }
 }
