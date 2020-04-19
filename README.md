@@ -3,8 +3,10 @@
 
 
 <div id="description">
+	
 Azure specific implementation of telemetry logging.  Uses the ITelemeteryLogger interface from _Cloud.Core_ and can be used in conjunction with the Telemetry Logging
 Provider classes found in the _Cloud.Core.Telemetry.Logging_ package.
+
 </div>
 
 ## Usage
@@ -24,7 +26,7 @@ Any of the logging methods can also handle exception, such as:
 
 ```csharp
 logger.LogWarning(new Exception("Something's gone wrong!"));
-``
+```
 
 ## Config
 
