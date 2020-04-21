@@ -9,13 +9,13 @@
     <PackageTags>Cloud.Core.Telemetry.AzureAppInsights AppInsights Azure .net-Core Core Logging</PackageTags>
     <PackageReleaseNotes />
     <Description>Azure specific implementation of ITelemetryLogger using AppInsights.</Description>
-    <Copyright>Cloud.Core.Telemetry.AzureAppInsights</Copyright>
+    <Copyright>Aylesbury Solutions Ltd</Copyright>
     <Version>3.1</Version>
-	<PackageIconUrl>https://cloud1core.blob.core.windows.net/icons/CC.png</PackageIconUrl>
+    <PackageIconUrl>https://cloud1core.blob.core.windows.net/icons/CC.png</PackageIconUrl>
     <Authors>Robert McCabe</Authors>
     <ProjectGuid>{b4c1dc56-307f-4daa-92de-5f3269d9d358}</ProjectGuid>
-	<RepositoryUrl>https://github.com/rmccabe24/Cloud.Core.AppHost</RepositoryUrl>
-	<RepositoryType>Private</RepositoryType>
+    <RepositoryUrl>https://github.com/rmccabe24/Cloud.Core.Telemetry.AzureAppInsights</RepositoryUrl>
+    <RepositoryType>Private</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
