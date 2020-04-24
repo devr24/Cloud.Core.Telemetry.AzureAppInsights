@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Company>Robert McCabe</Company>
+    <Company>Aylesbury Solutions Ltd</Company>
     <IsPackable>true</IsPackable>
     <PackageId>Cloud.Core.Telemetry.AzureAppInsights</PackageId>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -14,13 +14,13 @@
     <PackageIconUrl>https://cloud1core.blob.core.windows.net/icons/CC.png</PackageIconUrl>
     <Authors>Robert McCabe</Authors>
     <ProjectGuid>{b4c1dc56-307f-4daa-92de-5f3269d9d358}</ProjectGuid>
-    <RepositoryUrl>https://github.com/rmccabe24/Cloud.Core.Telemetry.AzureAppInsights</RepositoryUrl>
+    <RepositoryUrl>Cloud.Core.Telemetry.AzureAppInsights</RepositoryUrl>
     <RepositoryType>Private</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cloud.Core" Version="2.1.3513.106" />
-    <PackageReference Include="Cloud.Core.Telemetry.Logging" Version="3.1.3513.114" />
+    <PackageReference Include="Cloud.Core" Version="3.1.3517.260" />
+    <PackageReference Include="Cloud.Core.Telemetry.Logging" Version="3.1.3518.266" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.13.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.1.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />

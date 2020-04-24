@@ -7,7 +7,7 @@
     using Logging;
 
     /// <summary>
-    /// Class ServiceCollectionExtensions.
+    /// Class Service Collection extensions.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
@@ -25,7 +25,9 @@
                 var key = LoggingBuilderExtension.GetInstrumentationKeyFromConfig(config);
 
                 if (key.IsNullOrEmpty())
+                {
                     throw new InvalidOperationException("Could not find \"InstrumentationKey\" in configuration");
+                }
 
                 var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                 var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
@@ -37,10 +39,10 @@
         }
 
         /// <summary>
-        /// Adds the application insights telemetry singlton (ITelemetry).
+        /// Adds the application insights telemetry singleton (ITelemetry).
         /// </summary>
         /// <param name="services">The service collection to extend.</param>
-        /// <param name="insturmentationKey">The insturmentation key.</param>
+        /// <param name="insturmentationKey">The instrumentation key.</param>
         /// <returns>IServiceCollection.</returns>
         public static IServiceCollection AddAppInsightsTelemetry(this IServiceCollection services, string insturmentationKey)
         {

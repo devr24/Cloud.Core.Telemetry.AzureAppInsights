@@ -1,17 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : Cloud.Core.Telemetry.AzureAppInsights
-// Author           : rmccabe
-// Created          : 04-19-2020
-//
-// Last Modified By : rmccabe
-// Last Modified On : 04-19-2020
-// ***********************************************************************
-// <copyright file="AppInsights.cs" company="Robert McCabe">
-//     Cloud.Core.Telemetry.AzureAppInsights
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-namespace Cloud.Core.Telemetry.AzureAppInsights
+﻿namespace Cloud.Core.Telemetry.AzureAppInsights
 {
     using Diagnostics = System.Diagnostics;
     using System;
@@ -108,11 +95,12 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         }
 
         /// <inheritdoc />
-        public void Log<T>(LogLevel logLevel, EventId eventId, T state, Exception exception,
-            Func<T, Exception, string> formatter)
+        public void Log<T>(LogLevel logLevel, EventId eventId, T state, Exception exception, Func<T, Exception, string> formatter)
         {
             if (!IsEnabled(logLevel))
+            {
                 return;
+            }
 
             var message = formatter != null ? formatter(state, exception) : state.ToString();
 
@@ -154,38 +142,30 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
 
         /// <inheritdoc />
         public void LogVerbose(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogInformation(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogCritical(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogCritical(Exception ex, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Critical, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryException(LogLevel.Critical, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <summary>
@@ -197,11 +177,9 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
         public void LogDebug(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Debug, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryEvent(LogLevel.Debug, message, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <summary>
@@ -213,34 +191,28 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
         public void LogDebug(Exception ex, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryException(LogLevel.Debug, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryException(LogLevel.Debug, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogWarning(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
-            CreateTelemetryEvent(LogLevel.Warning, message, properties, callerMemberName, callerFilePath,
-                callerLineNumber);
+            CreateTelemetryEvent(LogLevel.Warning, message, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogWarning(Exception ex, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             CreateTelemetryException(LogLevel.Warning, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogError(string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             var telemetryEx = new TelemetryException(message);
 
@@ -249,32 +221,28 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
 
         /// <inheritdoc />
         public void LogError(Exception ex, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             CreateTelemetryException(LogLevel.Error, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogError(Exception ex, string message, Dictionary<string, string> properties = null,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             CreateTelemetryException(LogLevel.Error, message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogMetric(string metricName, double metricValue,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, null, callerMemberName, callerFilePath, callerLineNumber);
         }
 
         /// <inheritdoc />
         public void LogMetric(string metricName, double metricValue, Dictionary<string, string> properties,
-            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = -1)
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
             CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
@@ -289,8 +257,7 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         /// <param name="callerLineNumber">The caller line number.</param>
         /// <returns>Dictionary&lt;System.String, System.String&gt;.</returns>
         private Dictionary<string, string> SetDefaultProperties(LogLevel logLevel,
-            Dictionary<string, string> properties,
-            string callerMemberName, string callerFilePath, int callerLineNumber)
+            Dictionary<string, string> properties, string callerMemberName, string callerFilePath, int callerLineNumber)
         {
             // If properties were not set, initialise now and add default properties.
             var output = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties);
@@ -298,13 +265,19 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
             output.Add("Telemetry.LogLevel", logLevel.ToString());
 
             if (!string.IsNullOrEmpty(callerMemberName) && !output.ContainsKey("Telemetry.SummaryMessage"))
+            {
                 output.Add("Telemetry.MemberName", callerMemberName);
+            }
 
             if (!string.IsNullOrEmpty(callerFilePath) && !output.ContainsKey("Telemetry.SummaryMessage"))
+            {
                 output.Add("Telemetry.FilePath", System.IO.Path.GetFileName(callerFilePath));
+            }
 
             if (callerLineNumber > 0 && !output.ContainsKey("Telemetry.SummaryMessage"))
+            {
                 output.Add("Telemetry.LineNumber", callerLineNumber.ToString());
+            }
 
             return output;
         }
@@ -318,23 +291,28 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         /// <param name="callerMemberName">Name of the caller member.</param>
         /// <param name="callerFilePath">The caller file path.</param>
         /// <param name="callerLineNumber">The caller line number.</param>
-        private void CreateTelemetryEvent(LogLevel level, string message, Dictionary<string, string> properties,
+        private void CreateTelemetryEvent(LogLevel level, string message, Dictionary<string, string> properties, 
             string callerMemberName, string callerFilePath, int callerLineNumber)
         {
             if (!IsEnabled(level))
+            {
                 return;
+            }
 
             var telemetry = new EventTelemetry(message);
-
             var output = SetDefaultProperties(level, properties, callerMemberName, callerFilePath, callerLineNumber);
 
             if (!string.IsNullOrEmpty(message) && !telemetry.Properties.ContainsKey("Telemetry.SummaryMessage"))
+            {
                 telemetry.Properties.Add("Telemetry.SummaryMessage", message);
+            }
 
             foreach (var property in output)
             {
                 if (!telemetry.Properties.ContainsKey(property.Key))
+                {
                     telemetry.Properties.Add(property);
+                }
             }
 
             Client.TrackEvent(telemetry);
@@ -357,13 +335,11 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
                 return;
 
             var telemetry = new ExceptionTelemetry(ex) { Message = message };
-
             var output = SetDefaultProperties(level, properties, callerMemberName, callerFilePath, callerLineNumber);
 
             if (ex != null)
             {
-                if (!string.IsNullOrEmpty(ex.Message) &&
-                    !telemetry.Properties.ContainsKey("Telemetry.ExceptionMessage"))
+                if (!string.IsNullOrEmpty(ex.Message) && !telemetry.Properties.ContainsKey("Telemetry.ExceptionMessage"))
                 {
                     telemetry.Properties.Add("Telemetry.ExceptionMessage", ex.Message);
                 }
@@ -372,7 +348,9 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
             foreach (var property in output)
             {
                 if (!telemetry.Properties.ContainsKey(property.Key))
+                {
                     telemetry.Properties.Add(property);
+                }
             }
 
             Client.TrackException(telemetry);
@@ -424,20 +402,18 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
         {
             var URL = "http://api.applicationinsights.io/v1/apps/{0}/query?query={1}";
 
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Add(
-                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
-                var req = string.Format(URL, appInsightsId, query);
-                var responseMessage = client.GetAsync(req).Result;
+            using var client = new HttpClient();
+            
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+            var req = string.Format(URL, appInsightsId, query);
+            var responseMessage = client.GetAsync(req).Result;
 
-                var result = responseMessage.Content.ReadAsStringAsync().Result;
-                var queryResult = JsonConvert.DeserializeObject<BaseLogEntry>(result);
+            var result = responseMessage.Content.ReadAsStringAsync().Result;
+            var queryResult = JsonConvert.DeserializeObject<BaseLogEntry>(result);
 
-                var customDimensionIndex = queryResult.Tables[0].Columns.FindIndex(log => log.Name == "customDimensions");
-                return JsonConvert.DeserializeObject<T>(queryResult.Tables[0].Rows[0][customDimensionIndex].ToString());
-            }
+            var customDimensionIndex = queryResult.Tables[0].Columns.FindIndex(log => log.Name == "customDimensions");
+            return JsonConvert.DeserializeObject<T>(queryResult.Tables[0].Rows[0][customDimensionIndex].ToString());
         }
 
         // The following are classes to allow us to deserialize the Json returned from the Http request for GetCustomDimensions. 
@@ -450,7 +426,7 @@ namespace Cloud.Core.Telemetry.AzureAppInsights
             /// Gets the name.
             /// </summary>
             /// <value>The name.</value>
-            public string Name { get; }
+            public string Name { get; set; }
         }
 
         /// <summary>
