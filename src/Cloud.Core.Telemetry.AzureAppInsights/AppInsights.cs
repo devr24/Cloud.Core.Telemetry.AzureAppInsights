@@ -3,6 +3,7 @@
     using Diagnostics = System.Diagnostics;
     using System;
     using Microsoft.Extensions.Logging;
+    using Cloud.Core.Extensions;
     using System.Collections.Generic;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -10,6 +11,7 @@
     using System.Runtime.CompilerServices;
     using System.Net.Http;
     using Newtonsoft.Json;
+    using System.Linq;
 
     /// <summary>
     /// Azure specific Application Insights <see cref="ITelemetryLogger" /> implementation.
@@ -148,6 +150,22 @@
         }
 
         /// <inheritdoc />
+        public void LogVerbose(string message, object objectToLog, 
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogInformation(string message, object objectToLog, 
+            [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
         public void LogInformation(string message, Dictionary<string, string> properties = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
@@ -165,6 +183,20 @@
         public void LogCritical(Exception ex, Dictionary<string, string> properties = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
+            CreateTelemetryException(LogLevel.Critical, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogCritical(string message, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryEvent(LogLevel.Information, message, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogCritical(Exception ex, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
             CreateTelemetryException(LogLevel.Critical, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
@@ -211,6 +243,20 @@
         }
 
         /// <inheritdoc />
+        public void LogWarning(string message, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryEvent(LogLevel.Warning, message, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogWarning(Exception ex, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryException(LogLevel.Warning, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
         public void LogError(string message, Dictionary<string, string> properties = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
@@ -234,6 +280,20 @@
         }
 
         /// <inheritdoc />
+        public void LogError(Exception ex, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryException(LogLevel.Error, ex?.GetBaseException().Message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogError(Exception ex, string message, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
+            CreateTelemetryException(LogLevel.Error, message, ex, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
         public void LogMetric(string metricName, double metricValue,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
@@ -244,6 +304,13 @@
         public void LogMetric(string metricName, double metricValue, Dictionary<string, string> properties,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
         {
+            CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, properties, callerMemberName, callerFilePath, callerLineNumber);
+        }
+
+        /// <inheritdoc />
+        public void LogMetric(string metricName, double metricValue, object objectToLog, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = -1)
+        {
+            var properties = objectToLog.AsFlatStringDictionary(StringCasing.Unchanged, ".");
             CreateTelemetryMetric(LogLevel.Information, metricName, metricValue, properties, callerMemberName, callerFilePath, callerLineNumber);
         }
 
@@ -260,7 +327,7 @@
             Dictionary<string, string> properties, string callerMemberName, string callerFilePath, int callerLineNumber)
         {
             // If properties were not set, initialise now and add default properties.
-            var output = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties);
+            var output = properties ?? new Dictionary<string, string>();
 
             output.Add("Telemetry.LogLevel", logLevel.ToString());
 

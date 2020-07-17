@@ -845,5 +845,253 @@ namespace Cloud.Core.Telemetry.AzureAppInsights.Tests.Unit
             logger.LogLevel.Should().Be(LogLevel.Trace);
             logger.InstrumentationKey.Should().Be("test");
         }
+
+        /// <summary>Ensure logging Warning works as expected with an object and message.</summary>
+        [Fact]
+        public void Test_Telemetry_LogWarningMessageWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Warning);
+
+                // Act
+                logger.LogWarning("test", new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging Warning works as expected with an object and exception.</summary>
+        [Fact]
+        public void Test_Telemetry_LogWarningExceptionWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Warning);
+
+                // Act
+                logger.LogWarning(new Exception("test"), new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging critical works as expected with an object and message.</summary>
+        [Fact]
+        public void Test_Telemetry_LogCriticalMessageWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Critical);
+
+                // Act
+                logger.LogCritical("test", new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging critical works as expected with an object and exception.</summary>
+        [Fact]
+        public void Test_Telemetry_LogCriticalExceptionWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Critical);
+
+                // Act
+                logger.LogCritical(new Exception("test"), new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging error works as expected with an object and message.</summary>
+        [Fact]
+        public void Test_Telemetry_LogErrorMessageWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Error);
+
+                // Act
+                logger.LogError("test", new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging error works as expected with an object and exception.</summary>
+        [Fact]
+        public void Test_Telemetry_LogErrorExceptionWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Error);
+
+                // Act
+                logger.LogError(new Exception("test"), new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging metric works as expected with an object.</summary>
+        [Fact]
+        public void Test_Telemetry_LogMetricWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Information);
+
+                // Act
+                logger.LogMetric("test", 5, new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging verbose works as expected with an object.</summary>
+        [Fact]
+        public void Test_Telemetry_LogVerboseWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Debug);
+
+                // Act
+                logger.LogVerbose("test", new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        /// <summary>Ensure logging info works as expected with an object.</summary>
+        [Fact]
+        public void Test_Telemetry_LogInfoWithObject()
+        {
+            // Assert
+            AssertExtensions.DoesNotThrow(() =>
+            {
+                // Arrange
+                var logger = new AppInsightsLogger("test", LogLevel.Debug);
+
+                // Act
+                logger.LogInformation("test", new Test
+                {
+                    PropA = "propA",
+                    PropB = 1,
+                    PropC = true,
+                    PropD = new SubItem
+                    {
+                        PropE = "propE",
+                        PropF = new List<int> { 1, 2, 3 }
+                    }
+                });
+                logger.Flush();
+            });
+        }
+
+        public class Test
+        {
+            public string PropA { get; set; }
+            public int PropB { get; set; }
+            public bool PropC { get; set; }
+            public SubItem PropD { get; set; }
+        }
+
+        public class SubItem
+        {
+            public string PropE { get; set; }
+            public List<int> PropF { get; set; }
+        }
     }
 }
