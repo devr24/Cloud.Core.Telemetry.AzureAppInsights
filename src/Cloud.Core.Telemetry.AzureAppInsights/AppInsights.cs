@@ -3,7 +3,7 @@
     using Diagnostics = System.Diagnostics;
     using System;
     using Microsoft.Extensions.Logging;
-    using Cloud.Core.Extensions;
+    using Extensions;
     using System.Collections.Generic;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -11,7 +11,6 @@
     using System.Runtime.CompilerServices;
     using System.Net.Http;
     using Newtonsoft.Json;
-    using System.Linq;
 
     /// <summary>
     /// Azure specific Application Insights <see cref="ITelemetryLogger" /> implementation.
