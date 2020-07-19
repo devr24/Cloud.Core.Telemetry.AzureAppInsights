@@ -15,8 +15,9 @@
         /// Adds the application insights telemetry singlton (ITelemetry).
         /// </summary>
         /// <param name="services">The service collection to extend.</param>
+        /// <param name="maskSensitiveData">Data being logged should be masked if marked PersonalData or SensitiveInfo.</param>
         /// <returns>IServiceCollection.</returns>
-        public static IServiceCollection AddAppInsightsTelemetry(this IServiceCollection services)
+        public static IServiceCollection AddAppInsightsTelemetry(this IServiceCollection services, bool maskSensitiveData = true)
         {
             services.AddSingleton<ITelemetryLogger>((a) =>
             {
@@ -32,7 +33,7 @@
                 var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                 var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
 
-                return new AppInsightsLogger(key, LoggingBuilderExtension.GetLogLevel(defaultLevel, telemetryLevel));
+                return new AppInsightsLogger(key, LoggingBuilderExtension.GetLogLevel(defaultLevel, telemetryLevel), maskSensitiveData);
             });
 
             return services;
@@ -43,8 +44,9 @@
         /// </summary>
         /// <param name="services">The service collection to extend.</param>
         /// <param name="insturmentationKey">The instrumentation key.</param>
+        /// <param name="maskSensitiveData">Data being logged should be masked if marked PersonalData or SensitiveInfo.</param>
         /// <returns>IServiceCollection.</returns>
-        public static IServiceCollection AddAppInsightsTelemetry(this IServiceCollection services, string insturmentationKey)
+        public static IServiceCollection AddAppInsightsTelemetry(this IServiceCollection services, string insturmentationKey, bool maskSensitiveData = true)
         {
             services.AddSingleton<ITelemetryLogger>((a) =>
             {
@@ -53,7 +55,7 @@
                 var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                 var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
 
-                return new AppInsightsLogger(insturmentationKey, LoggingBuilderExtension.GetLogLevel(defaultLevel, telemetryLevel));
+                return new AppInsightsLogger(insturmentationKey, LoggingBuilderExtension.GetLogLevel(defaultLevel, telemetryLevel), maskSensitiveData);
             });
 
             return services;

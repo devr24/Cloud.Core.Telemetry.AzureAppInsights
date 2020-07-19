@@ -17,8 +17,9 @@
         /// Will attempt to pull "InstrumentationKey" from config values "Logging:InstrumentationKey" or directly from "InstrumentationKey"
         /// </summary>
         /// <param name="builder">The builder to add to.</param>
+        /// <param name="maskSensitiveData">Data being logged should be masked if marked PersonalData or SensitiveInfo.</param>
         /// <returns>The modified builder.</returns>
-        public static ILoggingBuilder AddAppInsightsLogger(this ILoggingBuilder builder)
+        public static ILoggingBuilder AddAppInsightsLogger(this ILoggingBuilder builder, bool maskSensitiveData = true)
         {
             builder.Services.AddSingleton<ITelemetryLogger>((a) =>
             {
@@ -32,7 +33,7 @@
                 var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                 var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
                 
-                return new AppInsightsLogger(key, GetLogLevel(defaultLevel, telemetryLevel));
+                return new AppInsightsLogger(key, GetLogLevel(defaultLevel, telemetryLevel), maskSensitiveData);
             });
     
             builder.Services.AddSingleton<ILoggerProvider>(a => new TelemetryLoggerProvider(a.GetService<ITelemetryLogger>()));
@@ -44,8 +45,9 @@
         /// </summary>
         /// <param name="builder">The builder to add to.</param>
         /// <param name="instrumentationKey">Instrumentation key for the Application Insights</param>
+        /// <param name="maskSensitiveData">Data being logged should be masked if marked PersonalData or SensitiveInfo.</param>
         /// <returns></returns>
-        public static ILoggingBuilder AddAppInsightsLogger(this ILoggingBuilder builder, string instrumentationKey)
+        public static ILoggingBuilder AddAppInsightsLogger(this ILoggingBuilder builder, string instrumentationKey, bool maskSensitiveData = true)
         {
             if (!instrumentationKey.IsNullOrWhiteSpace())
             {
@@ -56,7 +58,7 @@
                     var defaultLevel = config.GetValue<string>("Logging:LogLevel:Default");
                     var telemetryLevel = config.GetValue<string>("Logging:LogLevel:Telemetry");
 
-                    return new AppInsightsLogger(instrumentationKey, GetLogLevel(defaultLevel, telemetryLevel));
+                    return new AppInsightsLogger(instrumentationKey, GetLogLevel(defaultLevel, telemetryLevel), maskSensitiveData);
                 });
 
                 builder.Services.AddSingleton<ILoggerProvider>(a => new TelemetryLoggerProvider(a.GetService<ITelemetryLogger>()));
