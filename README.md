@@ -81,12 +81,17 @@ ITelemeteryLogger logger = new AppInsightsLogger("instrumentationKey");
 // Log metrics.
 logger.LogMetric("Metric Name", 100);
 
-// Log custom dimensions.
+// Log custom dimensions (as dictionary).
 logger.LogInformation("Some log message", new Dictionary<string, string> { 
 	{ "dimension1", "someVal" },
 	{ "dimension2", "someOtherVal" }
 });
+
+// Log custom dimensions (as object).
+logger.LogInformation("Some log message", new Example { Property1 = "someval", Property2 = true });
 ```
+
+_NOTE: Fields that have been marked as `Cloud.Core.Attributes.PersonalData`, `Cloud.Core.Attributes.SensitiveInfo` or `Microsoft.AspNetCore.Identity.PersonalData` are masked automatically when writing custom dimensions. The log message itself and the dicntionary are not checked for personal information - masking can only be used when logging a model (as then the properties can be reflected and inspected for the appropriate attributes)._
 
 If you use the first example (implicitly AddingAppInsightsLogger) without specifying config, the code will look for the instrumentation key in one of the following config settings:
 
