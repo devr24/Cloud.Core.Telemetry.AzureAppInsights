@@ -29,7 +29,9 @@ Any of the logging methods can also handle exception, such as:
 logger.LogWarning(new Exception("Something's gone wrong!"));
 ```
 
-## Config
+## Configuring an instance
+
+### Inline instance 
 
 There are a number of ways to create an instance of the AppInsights logger, the simpliest and most direct way is the following:
 
@@ -37,15 +39,45 @@ There are a number of ways to create an instance of the AppInsights logger, the 
 var logger = new AppInsightsLogger("instrumentationKey", LogLevel.Debug);
 ```
 
-However, typical use case is as an instance of the `ITelemetryLogger` interface and with an IServiceCollection (in a Startup.cs file).  Therefore, leveraging the extensions methods that have been built for convenience as follows during the Logger configuration is probably easier:
+### Instance using Dependency Injection
+
+A typical use case is as an instance of the `ITelemetryLogger` interface and with an IServiceCollection.  Therefore, leveraging the extensions methods that have been built for convenience as follows during the Logger configuration is probably easier:
+
+```csharp
+private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+	WebHost.CreateDefaultBuilder(args)
+		.ConfigureAppConfiguration(config => {
+
+			// Import default configurations (env vars, command line args, appSettings.json etc).
+			config.UseDefaultConfigs();
+		})
+		.ConfigureLogging((context, logging) => {
+			
+			// Add logging configuration and loggers.
+			logging.AddConfiguration(context.Configuration)
+				.AddConsole()
+				.AddDebug()
+				.AddAppInsightsLogger(); // automatically resolves instrumentation key and log levels.
+		})
+		.UseStartup<Startup>();
+```
+
+Here we can see we did not specify the config level or the instrumentation key.  The instrumentation key is resolve automatically by pulling one of the following from config:
+
+ 1. _InstrumentationKey_
+ 2. _APPINSIGHTS_INSTRUMENTATIONKEY_
+ 3. _Logging:InstrumentationKey_
+ 4. _AppInsights:InstrumentationKey_
+
+If It cannot find it here, it will throw an invalid argument exception.
 
 ```csharp
 public class Startup
 {
     public void ConfigureAppConfiguration(IConfigurationBuilder builder)
     {
-        // Read config from config sources...
-        builder.UseKubernetesContainerConfig();
+		// Import default configurations (env vars, command line args, appSettings.json etc).
+        builder.UseDefaultConfigs();
     }
 
     public void ConfigureLogging(IConfiguration config, ILoggingBuilder builder)
@@ -54,14 +86,9 @@ public class Startup
 
         // Add some default loggers.
         builder.AddConsole();
-        builder.AddDebug();
+			   .AddDebug();
 
-        // Add your app insights telemetry logger here!
-        
-        // 1. Implicitly using instrumentation key.
-        builder.AddAppInsightsLogger();
-
-        // 2. Explicitly specifying the instrumentation key.
+        // Explicitly specifying the instrumentation key.
         var instrumentationKey = config.GetValue<string>("InstrumentationKey");
         builder.AddAppInsightsLogger(instrumentationKey);
     }
@@ -73,12 +100,16 @@ public class Startup
 }
 ```
 
+The second example (explicit setting of instrumentation key), you pass it an instruementation key you have loaded yourself.
+
+Both examples above will look for log level from config specified in the "Logging:LogLevel:Telemetry" setting.  If it cannot find that, it will default to _Logging:LogLevel:Default_ for its setting.  Failing that, it falls back to info.
+
 ## Logging Metrics and Custom Dimensions
 
 ```csharp
 ITelemeteryLogger logger = new AppInsightsLogger("instrumentationKey");
 
-// Log metrics.
+// Log metrics stats.
 logger.LogMetric("Metric Name", 100);
 
 // Log custom dimensions (as dictionary).
@@ -87,24 +118,39 @@ logger.LogInformation("Some log message", new Dictionary<string, string> {
 	{ "dimension2", "someOtherVal" }
 });
 
-// Log custom dimensions (as object).
-logger.LogInformation("Some log message", new Example { Property1 = "someval", Property2 = true });
+// Log custom dimensions (as object). This functionality allows for Pii data masking.
+logger.LogInformation("Some log message", new ExampleModel { Property1 = "someval", Property2 = true });
+```
+
+## Pii Data Masking
+
+Take this model that has Personal Data (Pii) flagged as an example:
+
+```csharp
+public class ExampleModel {
+	public string Id { get; set; }
+	[PersonalData]
+	public string Name { get; set; }
+	public bool IsActive { get; set; }
+}
+```
+
+When we log the model, the `Name` field will be masked:
+
+```csharp
+// Pii data model.
+var model = new ExampleModel { 
+	Id = "12345", 
+	Name = "Robert", 
+	IsActive = true 
+};
+
+// Logging model allows for Pii data masking.
+logger.LogInformation("Some log message", model);
+
 ```
 
 _NOTE: Fields that have been marked as `Cloud.Core.Attributes.PersonalData`, `Cloud.Core.Attributes.SensitiveInfo` or `Microsoft.AspNetCore.Identity.PersonalData` are masked automatically when writing custom dimensions. The log message itself and the dicntionary are not checked for personal information - masking can only be used when logging a model (as then the properties can be reflected and inspected for the appropriate attributes)._
-
-If you use the first example (implicitly AddingAppInsightsLogger) without specifying config, the code will look for the instrumentation key in one of the following config settings:
-
-1. _InstrumentationKey_
-2. _APPINSIGHTS_INSTRUMENTATIONKEY_
-3. _Logging:InstrumentationKey_
-4. _AppInsights:InstrumentationKey_
-
-If It cannot find it here, it will throw an invalid argument exception.
-
-The second example (explicit setting of instrumentation key), you pass it an instruementation key you have loaded yourself.
-
-Both examples will look for log level from config specified in the "Logging:LogLevel:Telemetry" setting.  If it cannot find that, it will default to _Logging:LogLevel:Default_ for its setting.  Failing that, it falls back to info.
 
 ## Further Reading
 
