@@ -6,6 +6,7 @@
     using Cloud.Core.Telemetry.Logging;
     using Microsoft.Extensions.Configuration;
     using DependencyInjection;
+    using Cloud.Core.Extensions;
 
     /// <summary>
     /// Telemetry logger factory adds the AddTelemetryLogger method to the ILoggingBuilder.

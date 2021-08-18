@@ -10,6 +10,7 @@
     using Microsoft.ApplicationInsights;
     using System.Runtime.CompilerServices;
     using System.Net.Http;
+    using Cloud.Core.Extensions;
     using Newtonsoft.Json;
 
     /// <summary>

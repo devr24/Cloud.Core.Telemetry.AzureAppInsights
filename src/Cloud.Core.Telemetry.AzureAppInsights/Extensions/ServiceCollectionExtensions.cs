@@ -2,6 +2,7 @@
 {
     using System;
     using Cloud.Core;
+    using Cloud.Core.Extensions;
     using Cloud.Core.Telemetry.AzureAppInsights;
     using Configuration;
     using Logging;
